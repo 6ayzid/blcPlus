@@ -16,7 +16,7 @@
 
 ## 📖 What is blcPlus?
 
-**blcPlus** is a powerful, open-source Firefox extension specifically designed to enhance the experience on the Daffodil International University (DIU) Blended Learning Center (BLC) portal. It actively monitors your session state and uses background automation to handle authentication and session longevity—wrapped in a beautiful, Material 3 design dashboard.
+**blcPlus** is a powerful, open-source Chrome extension specifically designed to enhance the experience on the Daffodil International University (DIU) Blended Learning Center (BLC) portal. It actively monitors your session state and uses background automation to handle authentication and session longevity—wrapped in a beautiful, Material 3 design dashboard.
 
 ## ✨ Features
 
@@ -28,16 +28,16 @@
 
 ## 🚀 Installation (Developer Mode)
 
-The extension is loaded manually in Firefox using developer mode:
+The extension is loaded manually in Chrome using developer mode:
 
 1. Clone or download this repository:
    ```bash
    git clone https://github.com/6ayzid/blcPlus.git
    ```
-2. Open Firefox and go to `about:debugging`.
-3. Click **This Firefox** in the sidebar.
-4. Click **Load Temporary Add-on...**.
-5. Select the `manifest.json` file inside the downloaded `blcPlus` folder.
+2. Open Chrome and go to `chrome://extensions`.
+3. Enable **Developer mode** in the top-right corner.
+4. Click **Load unpacked**.
+5. Select the downloaded `blcPlus` folder.
 
 The blcPlus icon will now appear in your Firefox toolbar!
 
