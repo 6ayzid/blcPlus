@@ -1,4 +1,42 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const extensionApi = globalThis.browser ?? globalThis.chrome;
+
+  function getStorage(keys) {
+    if (globalThis.browser?.storage?.local?.get) {
+      return globalThis.browser.storage.local.get(keys);
+    }
+
+    return new Promise((resolve, reject) => {
+      extensionApi.storage.local.get(keys, (result) => {
+        const error = extensionApi.runtime?.lastError;
+        if (error) {
+          reject(new Error(error.message));
+          return;
+        }
+
+        resolve(result);
+      });
+    });
+  }
+
+  function setStorage(values) {
+    if (globalThis.browser?.storage?.local?.set) {
+      return globalThis.browser.storage.local.set(values);
+    }
+
+    return new Promise((resolve, reject) => {
+      extensionApi.storage.local.set(values, () => {
+        const error = extensionApi.runtime?.lastError;
+        if (error) {
+          reject(new Error(error.message));
+          return;
+        }
+
+        resolve();
+      });
+    });
+  }
+
   const usernameInput = document.getElementById('username');
   const passwordInput = document.getElementById('password');
   const autoLoginToggle = document.getElementById('autoLogin');
@@ -10,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const togglePasswordBtn = document.getElementById('togglePassword');
 
   // Load existing credentials
-  browser.storage.local.get(["username", "password", "autoLogin"]).then((result) => {
+  getStorage(["username", "password", "autoLogin"]).then((result) => {
     if (result.username) usernameInput.value = result.username;
     if (result.password) passwordInput.value = result.password;
     
@@ -33,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     statusDiv.className = '';
     statusDiv.textContent = 'Saving...';
     
-    browser.storage.local.set({ username, password, autoLogin }).then(() => {
+    setStorage({ username, password, autoLogin }).then(() => {
       statusDiv.textContent = 'Settings saved securely!';
       statusDiv.className = 'success';
       setTimeout(() => { statusDiv.textContent = ''; }, 3000);

@@ -3,7 +3,7 @@
   
   # blcPlus 🚀
   
-  **The Ultimate Quality-of-Life Upgrade for the DIU BLC Portal.**
+  **BLC, but actually good**
   
   [![Firefox Add-on](https://img.shields.io/badge/Firefox-Extension-FF7139?style=flat-square&logo=Firefox-Browser)](https://github.com/6ayzid/blcPlus)
   [![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=flat-square)](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
@@ -28,16 +28,16 @@
 
 ## 🚀 Installation (Developer Mode)
 
-Currently, the extension is loaded manually via Firefox's debugging tools:
+The extension is loaded manually in Firefox using developer mode:
 
 1. Clone or download this repository:
    ```bash
    git clone https://github.com/6ayzid/blcPlus.git
    ```
-2. Open Firefox and type `about:debugging` into the URL address bar.
-3. Click on **"This Firefox"** in the left-hand sidebar.
-4. Click the **"Load Temporary Add-on..."** button.
-5. Navigate to the downloaded `blcPlus` folder and select the `manifest.json` file.
+2. Open Firefox and go to `about:debugging`.
+3. Click **This Firefox** in the sidebar.
+4. Click **Load Temporary Add-on...**.
+5. Select the `manifest.json` file inside the downloaded `blcPlus` folder.
 
 The blcPlus icon will now appear in your Firefox toolbar!
 
@@ -57,4 +57,4 @@ The blcPlus icon will now appear in your Firefox toolbar!
 - `background.js`: The alarm-driven service that pings the server to keep your session alive.
 
 ---
-*Disclaimer: This extension securely stores your credentials locally within your browser using `browser.storage.local`. It does not send your data to any external servers.*
+*Disclaimer: This extension securely stores your credentials locally within your browser using the extension storage API. It does not send your data to any external servers.*

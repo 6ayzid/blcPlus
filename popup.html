@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>blcPlus Settings</title>
@@ -86,8 +87,13 @@
     }
 
     /* Common typography */
-    h1, h2, h3, p { margin: 0; }
-    
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
     .header {
       text-align: center;
       margin-bottom: 24px;
@@ -155,7 +161,7 @@
       padding: 4px;
       display: flex;
     }
-    
+
     .toggle-password:hover {
       color: var(--text);
     }
@@ -185,12 +191,19 @@
       height: 24px;
     }
 
-    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
 
     .slider {
       position: absolute;
       cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background-color: var(--border);
       transition: .3s;
       border-radius: var(--radius-full);
@@ -199,24 +212,27 @@
     .slider:before {
       position: absolute;
       content: "";
-      height: 18px; width: 18px;
-      left: 3px; bottom: 3px;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
       background-color: white;
       transition: .3s cubic-bezier(0.25, 1, 0.5, 1);
       border-radius: 50%;
       box-shadow: var(--shadow-sm);
     }
 
-    input:checked + .slider {
+    input:checked+.slider {
       background-color: var(--primary);
     }
 
-    input:checked + .slider:before {
+    input:checked+.slider:before {
       transform: translateX(20px);
     }
 
     /* Action Button */
     .btn-primary {
+      display: block;
       width: 100%;
       padding: 14px;
       font-size: 15px;
@@ -228,6 +244,9 @@
       cursor: pointer;
       transition: transform 0.1s, background-color 0.2s;
       box-shadow: var(--shadow-md);
+      text-decoration: none;
+      text-align: center;
+      box-sizing: border-box;
     }
 
     .btn-primary:hover {
@@ -270,12 +289,12 @@
       background-color: var(--bg-alt);
       color: var(--text);
     }
-    
+
     .dev-link svg {
       margin-left: 4px;
       transition: transform 0.2s ease;
     }
-    
+
     .dev-link:hover svg {
       transform: translateX(3px);
       color: var(--primary);
@@ -392,33 +411,40 @@
       font-weight: 500;
       min-height: 16px;
     }
-    .success { color: #10b981; }
-    .error { color: #ef4444; }
 
+    .success {
+      color: #10b981;
+    }
+
+    .error {
+      color: #ef4444;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="view-container">
-    
+
     <!-- VIEW A: Settings -->
     <div class="view settings-view">
       <div class="header">
         <img src="icons/128x128.png" alt="blcPlus Logo" class="logo-img">
-        <p class="subtitle">Automated Portal Access</p>
+        <p class="subtitle">BLC, but actually good</p>
       </div>
 
       <div class="form-group">
         <label class="input-label" for="username">Student ID</label>
         <input type="text" id="username" class="input-field" placeholder="e.g. 211-15-12345">
       </div>
-      
+
       <div class="form-group">
         <label class="input-label" for="password">Password</label>
         <div class="password-wrapper">
           <input type="password" id="password" class="input-field" placeholder="••••••••">
           <button type="button" class="toggle-password" id="togglePassword">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
@@ -433,7 +459,7 @@
           <span class="slider"></span>
         </label>
       </div>
-      
+
       <button id="saveBtn" class="btn-primary">Save Settings</button>
       <div id="status"></div>
 
@@ -441,7 +467,8 @@
         <hr class="divider">
         <button class="dev-link" id="showProfileBtn">
           Open Sourced by Bayzid Ahmed
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
@@ -452,7 +479,8 @@
     <div class="view profile-view">
       <div class="nav-header">
         <button class="btn-back" id="backBtn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -461,17 +489,28 @@
       </div>
 
       <div class="profile-card">
-        <img class="avatar" src="https://i.ibb.co.com/SF2ZcQb/make-this-look-more-realistic-202605031214-lossless.jpg" alt="Bayzid Ahmed">
+        <img class="avatar" src="https://i.ibb.co.com/SF2ZcQb/make-this-look-more-realistic-202605031214-lossless.jpg"
+          alt="Bayzid Ahmed">
         <h2 class="profile-name">Bayzid Ahmed</h2>
         <p class="profile-title">Full Stack Developer | CSE Student</p>
-        
+
         <div class="social-links">
           <a href="https://github.com/6ayzid" class="social-link" target="_blank">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+              </path>
+            </svg>
             GitHub
           </a>
           <a href="https://github.com/6ayzid/blcPlus" class="social-link" target="_blank">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
             Repo
           </a>
         </div>
@@ -479,7 +518,7 @@
 
       <div class="cta-container">
         <p class="cta-text">Let's build something together!</p>
-        <button class="btn-primary" onclick="window.open('mailto:8ayzid@gmail.com', '_blank')">Contact Me</button>
+        <a class="btn-primary" href="mailto:8ayzid@gmail.com">Contact Me</a>
       </div>
     </div>
 
@@ -487,4 +526,5 @@
 
   <script src="popup.js"></script>
 </body>
+
 </html>

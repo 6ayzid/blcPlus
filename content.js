@@ -2,6 +2,26 @@
 
 console.log("blcPlus: Content script initialized.");
 
+const extensionApi = globalThis.browser ?? globalThis.chrome;
+
+function getStorage(keys) {
+  if (globalThis.browser?.storage?.local?.get) {
+    return globalThis.browser.storage.local.get(keys);
+  }
+
+  return new Promise((resolve, reject) => {
+    extensionApi.storage.local.get(keys, (result) => {
+      const error = extensionApi.runtime?.lastError;
+      if (error) {
+        reject(new Error(error.message));
+        return;
+      }
+
+      resolve(result);
+    });
+  });
+}
+
 // Utility to robustly wait for an element to appear in the DOM
 function waitForElement(selector, timeout = 5000) {
   return new Promise((resolve) => {
@@ -25,28 +45,58 @@ function waitForElement(selector, timeout = 5000) {
   });
 }
 
-const currentUrl = window.location.href;
+const currentUrl = new URL(window.location.href);
 const loginUrlPath = 'login/index.php';
 const rootUrl = 'https://elearn.daffodilvarsity.edu.bd/';
 const dashboardUrl = 'https://elearn.daffodilvarsity.edu.bd/my/';
+const targetLogoSelector = 'img.navbar-brand-logo.logo';
+const extensionLogoUrl = extensionApi.runtime.getURL('icons/128x128.png');
+
+function replaceNavbarLogo() {
+  const logos = document.querySelectorAll(targetLogoSelector);
+  logos.forEach((logo) => {
+    if (logo.dataset.blcPlusLogoApplied === 'true') return;
+    logo.src = extensionLogoUrl;
+    logo.srcset = extensionLogoUrl;
+    logo.dataset.blcPlusLogoApplied = 'true';
+  });
+}
+
+function startNavbarLogoWatcher() {
+  replaceNavbarLogo();
+
+  const logoObserver = new MutationObserver(() => {
+    replaceNavbarLogo();
+  });
+
+  logoObserver.observe(document.documentElement, { childList: true, subtree: true });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startNavbarLogoWatcher, { once: true });
+} else {
+  startNavbarLogoWatcher();
+}
 
 // 1. Root URL Redirect (If logged in, go to Dashboard)
 setTimeout(() => {
   const isLoggedOut = document.body.classList.contains('notloggedin');
-  if (!isLoggedOut && (currentUrl === rootUrl || currentUrl === rootUrl + '?redirect=0')) {
+  const isPlainRootPage = currentUrl.origin === 'https://elearn.daffodilvarsity.edu.bd' && currentUrl.pathname === '/' && currentUrl.search === '';
+
+  if (!isLoggedOut && isPlainRootPage) {
     console.log("blcPlus: Logged in and on root URL. Redirecting to dashboard...");
     window.location.replace(dashboardUrl);
   }
 }, 500);
 
 // Retrieve stored settings
-browser.storage.local.get(["username", "password", "autoLogin"]).then(async (result) => {
+getStorage(["username", "password", "autoLogin"]).then(async (result) => {
   if (result.autoLogin !== true) {
     console.log("blcPlus: Auto-Login is disabled or settings not found.");
     return;
   }
 
-  const isExplicitLoginPage = currentUrl.includes(loginUrlPath);
+  const isExplicitLoginPage = currentUrl.pathname.includes(loginUrlPath);
   const isLoggedOutClassPresent = document.body.classList.contains('notloggedin');
 
   // 2 & 3. Execute Auto-Login sequence
