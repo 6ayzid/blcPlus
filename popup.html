@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>blcPlus Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0062a5;
+      --primary-hover: #004d80;
+      --bg: #ffffff;
+      --bg-alt: #f8f9fa;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+      --radius-full: 9999px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #3b82f6;
+        --primary-hover: #60a5fa;
+        --bg: #1f2937;
+        --bg-alt: #111827;
+        --text: #f9fafb;
+        --text-muted: #9ca3af;
+        --border: #374151;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      width: 340px;
+      height: 540px;
+      overflow: hidden;
+    }
+
+    .view-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 24px;
+      box-sizing: border-box;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-view {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .profile-view {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.show-profile .settings-view {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.show-profile .profile-view {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Common typography */
+    h1, h2, h3, p { margin: 0; }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo-img {
+      height: 48px;
+      width: auto;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+    }
+    
+    .toggle-password:hover {
+      color: var(--text);
+    }
+
+    /* Toggle Switch Container */
+    .switch-card {
+      background-color: var(--bg-alt);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .switch-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Toggle Switch UI */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--border);
+      transition: .3s;
+      border-radius: var(--radius-full);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .3s cubic-bezier(0.25, 1, 0.5, 1);
+      border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Action Button */
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background-color: var(--primary);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: auto;
+      text-align: center;
+    }
+
+    .divider {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 16px 0;
+    }
+
+    .dev-link {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .dev-link:hover {
+      background-color: var(--bg-alt);
+      color: var(--text);
+    }
+    
+    .dev-link svg {
+      margin-left: 4px;
+      transition: transform 0.2s ease;
+    }
+    
+    .dev-link:hover svg {
+      transform: translateX(3px);
+      color: var(--primary);
+    }
+
+    /* Profile View */
+    .nav-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-family: inherit;
+      margin-left: -8px;
+    }
+
+    .btn-back:hover {
+      color: var(--primary);
+    }
+
+    .profile-card {
+      text-align: center;
+      background-color: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      margin: 0 auto 16px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      box-shadow: var(--shadow-md);
+      object-fit: cover;
+    }
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .profile-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      text-decoration: none;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .social-link:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .cta-container {
+      margin-top: auto;
+      background-color: var(--bg-alt);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .cta-text {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      min-height: 16px;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+
+  </style>
+</head>
+<body>
+
+  <div class="view-container">
+    
+    <!-- VIEW A: Settings -->
+    <div class="view settings-view">
+      <div class="header">
+        <img src="icons/128x128.png" alt="blcPlus Logo" class="logo-img">
+        <p class="subtitle">Automated Portal Access</p>
+      </div>
+
+      <div class="form-group">
+        <label class="input-label" for="username">Student ID</label>
+        <input type="text" id="username" class="input-field" placeholder="e.g. 211-15-12345">
+      </div>
+      
+      <div class="form-group">
+        <label class="input-label" for="password">Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" class="input-field" placeholder="••••••••">
+          <button type="button" class="toggle-password" id="togglePassword">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="switch-card">
+        <span class="switch-label">Enable Auto-Login</span>
+        <label class="switch">
+          <input type="checkbox" id="autoLogin" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <button id="saveBtn" class="btn-primary">Save Settings</button>
+      <div id="status"></div>
+
+      <div class="footer">
+        <hr class="divider">
+        <button class="dev-link" id="showProfileBtn">
+          Open Sourced by Bayzid Ahmed
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW B: Developer Profile -->
+    <div class="view profile-view">
+      <div class="nav-header">
+        <button class="btn-back" id="backBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back
+        </button>
+      </div>
+
+      <div class="profile-card">
+        <img class="avatar" src="https://i.ibb.co.com/SF2ZcQb/make-this-look-more-realistic-202605031214-lossless.jpg" alt="Bayzid Ahmed">
+        <h2 class="profile-name">Bayzid Ahmed</h2>
+        <p class="profile-title">Full Stack Developer | CSE Student</p>
+        
+        <div class="social-links">
+          <a href="https://github.com/6ayzid" class="social-link" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+            GitHub
+          </a>
+          <a href="https://github.com/6ayzid/blcPlus" class="social-link" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            Repo
+          </a>
+        </div>
+      </div>
+
+      <div class="cta-container">
+        <p class="cta-text">Let's build something together!</p>
+        <button class="btn-primary" onclick="window.open('mailto:8ayzid@gmail.com', '_blank')">Contact Me</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

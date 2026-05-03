@@ -1,0 +1,12 @@
+/* Custom CSS injected into the university portal */
+
+/* Example: Change the background color for better readability */
+body {
+  /* background-color: #f4f4f9 !important; */
+}
+
+/* Example: Highlight a specific container */
+.login-container {
+  /* border: 2px solid #4a90e2 !important; */
+  /* border-radius: 8px !important; */
+}
