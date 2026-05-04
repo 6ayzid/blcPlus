@@ -2,11 +2,15 @@
 
 const extensionApi = globalThis.browser ?? globalThis.chrome;
 
-// Create the keepAlive alarm when the extension loads/starts
-extensionApi.alarms.create("keepAlive", {
-  delayInMinutes: 15, // Starts the first ping after 15 minutes
-  periodInMinutes: 15 // Repeats every 15 minutes
+// Create the keepAlive alarm when the extension is installed or updated
+extensionApi.runtime.onInstalled.addListener(() => {
+  extensionApi.alarms.create("keepAlive", {
+    delayInMinutes: 15, // Starts the first ping after 15 minutes
+    periodInMinutes: 15 // Repeats every 15 minutes
+  });
+  console.log("Keep-alive alarm scheduled.");
 });
+
 
 // Listen for alarms
 extensionApi.alarms.onAlarm.addListener((alarm) => {
