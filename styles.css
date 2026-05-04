@@ -1,12 +1,221 @@
 /* Custom CSS injected into the university portal */
 
-/* Example: Change the background color for better readability */
-body {
-  /* background-color: #f4f4f9 !important; */
+html[data-blc-loading="true"] body {
+  display: none !important;
+}
+html[data-theme-decent="false"] .blc-decent-wrapper {
+  display: none !important;
 }
 
-/* Example: Highlight a specific container */
-.login-container {
-  /* border: 2px solid #4a90e2 !important; */
-  /* border-radius: 8px !important; */
+:root {
+  --primary: #2563eb;
+  --primary-light: #eff6ff;
+  --primary-dark: #1d4ed8;
+  --accent: #f59e0b;
+  --accent-light: #fffbeb;
+  --surface: #ffffff;
+  --background: #f8fafc;
+  --muted: #64748b;
+  --muted-light: #94a3b8;
+  --danger: #f43f5e;
+  --danger-light: #fff1f2;
+  --success: #10b981;
+  --success-light: #ecfdf5;
+  --info: #0ea5e9;
+  --info-light: #f0f9ff;
+  --warning: #f97316;
+  --warning-light: #fff7ed;
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --navbar-bg: #0f172a;
+  --navbar-text: #f8fafc;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+}
+
+.blc-decent-wrapper {
+  font-family: var(--font);
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.blc-decent-wrapper *, 
+.blc-decent-wrapper *::before, 
+.blc-decent-wrapper *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+/* ===== HIDE VANILLA MOODLE ===== */
+html:not([data-theme-decent="false"]) #page-header,
+html:not([data-theme-decent="false"]) nav.navbar:not(.blc-decent-navbar) {
+  display: none !important;
+}
+
+/* ===== DECENT NAVBAR ===== */
+.blc-decent-navbar.nav-hidden { transform: translateY(-100%); }
+
+.blc-decent-navbar {
+  background: var(--navbar-bg);
+  color: var(--navbar-text);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: transform 0.25s ease;
+  font-family: var(--font);
+  box-shadow: var(--shadow-sm);
+}
+.blc-decent-navbar .decent-navbar-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: 56px;
+}
+.blc-decent-navbar .nav-left { display: flex; align-items: center; gap: var(--space-6); }
+.blc-decent-navbar .logo {
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.blc-decent-navbar .nav-links {
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+}
+@media (min-width: 768px) {
+  .blc-decent-navbar .nav-links { display: flex; }
+}
+.blc-decent-navbar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+.blc-decent-navbar .nav-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.06); }
+.blc-decent-navbar .nav-link.active { color: #fff; background: rgba(255,255,255,0.1); }
+.blc-decent-navbar .nav-link svg { width: 18px; height: 18px; opacity: 0.8; }
+.blc-decent-navbar .nav-link.active svg { opacity: 1; }
+
+.blc-decent-navbar .avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 0.75rem; color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.15);
+  overflow: hidden;
+}
+.blc-decent-navbar .avatar img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.blc-decent-navbar .mobile-menu-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: transparent; border: none; color: var(--navbar-text);
+  cursor: pointer; border-radius: var(--radius-sm);
+}
+@media (min-width: 768px) {
+  .blc-decent-navbar .mobile-menu-btn { display: none; }
+}
+
+/* ===== MOBILE NAV ===== */
+
+.blc-decent-wrapper.mobile-nav {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.blc-decent-wrapper.mobile-nav.nav-hidden {
+  transform: translateY(100%);
+}
+
+.blc-decent-wrapper.mobile-nav {
+  display: block;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--navbar-bg);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 100;
+  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+  font-family: var(--font);
+}
+.blc-decent-wrapper .mobile-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.blc-decent-wrapper .mobile-nav-link {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px var(--space-3);
+  margin: 0;
+  min-height: 0;
+  line-height: 1;
+  border-radius: var(--radius-md);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none; background: transparent; font-family: inherit;
+  flex: 1;
+}
+.blc-decent-wrapper .mobile-nav-link svg { width: 22px; height: 22px; opacity: 0.8; display: block; margin: 0; }
+.blc-decent-wrapper .mobile-nav-link.active { color: #fff; }
+.blc-decent-wrapper .mobile-nav-link.active svg { color: #fff; opacity: 1; }
+
+@media (min-width: 768px) {
+
+.blc-decent-wrapper.mobile-nav {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.blc-decent-wrapper.mobile-nav.nav-hidden {
+  transform: translateY(100%);
+}
+
+.blc-decent-wrapper.mobile-nav { display: none !important; }
+}
+@media (max-width: 767px) {
+  body { padding-bottom: 64px !important; }
 }

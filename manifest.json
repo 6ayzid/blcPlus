@@ -13,18 +13,28 @@
     "https://elearn.daffodilvarsity.edu.bd/*"
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "persistent": false
   },
   "content_scripts": [
     {
-      "matches": ["https://elearn.daffodilvarsity.edu.bd/*"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
+      "matches": [
+        "https://elearn.daffodilvarsity.edu.bd/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
     },
     {
-      "matches": ["https://elearn.daffodilvarsity.edu.bd/*"],
-      "css": ["styles.css"],
+      "matches": [
+        "https://elearn.daffodilvarsity.edu.bd/*"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_start"
     }
   ],
@@ -37,11 +47,16 @@
     }
   },
   "web_accessible_resources": [
-    "icons/128x128.png"
+    "icons/128x128.png",
+    "logo/128x128.png"
   ],
   "browser_specific_settings": {
     "gecko": {
       "id": "blcplus@bayzid.dev"
     }
   }
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

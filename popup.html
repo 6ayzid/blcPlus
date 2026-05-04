@@ -40,7 +40,7 @@
       background-color: var(--bg);
       color: var(--text);
       width: 340px;
-      height: 540px;
+      height: 600px;
       overflow: hidden;
     }
 
@@ -61,6 +61,8 @@
       transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .settings-view {
@@ -292,12 +294,47 @@
 
     .dev-link svg {
       margin-left: 4px;
-      transition: transform 0.2s ease;
+      transition: color 0.2s ease, transform 0.2s ease;
+      animation: encourage-click 6s ease-in-out infinite;
+    }
+
+    @keyframes encourage-click {
+      0% { transform: translateX(0); color: var(--text-muted); }
+      5% { transform: translateX(6px); color: var(--primary); }
+      10% { transform: translateX(0); color: var(--text-muted); }
+      15% { transform: translateX(6px); color: var(--primary); }
+      20% { transform: translateX(0); color: var(--text-muted); }
+      100% { transform: translateX(0); color: var(--text-muted); }
     }
 
     .dev-link:hover svg {
-      transform: translateX(3px);
+      animation: none;
+      transform: translateX(4px);
       color: var(--primary);
+    }
+
+    .shine-text {
+      background: linear-gradient(
+        110deg,
+        var(--text-muted) 20%,
+        var(--text) 40%,
+        var(--text) 60%,
+        var(--text-muted) 80%
+      );
+      background-size: 200% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: shine 3s linear 5 forwards;
+    }
+
+    @keyframes shine {
+      from {
+        background-position: 200% center;
+      }
+      to {
+        background-position: -200% center;
+      }
     }
 
     /* Profile View */
@@ -435,7 +472,7 @@
 
       <div class="form-group">
         <label class="input-label" for="username">Username</label>
-        <input type="text" id="username" class="input-field" placeholder="e.g. 211-15-12345">
+        <input type="text" id="username" class="input-field" placeholder="e.g. 6ayzid">
       </div>
 
       <div class="form-group">
@@ -460,13 +497,21 @@
         </label>
       </div>
 
+      <div class="switch-card">
+        <span class="switch-label">Enable Decent Design</span>
+        <label class="switch">
+          <input type="checkbox" id="decentUI" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
       <button id="saveBtn" class="btn-primary">Save Settings</button>
       <div id="status"></div>
 
       <div class="footer">
         <hr class="divider">
         <button class="dev-link" id="showProfileBtn">
-          Open Sourced by Bayzid Ahmed
+          <span class="shine-text">Open Sourced by Bayzid Ahmed</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>

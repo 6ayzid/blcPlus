@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const usernameInput = document.getElementById('username');
   const passwordInput = document.getElementById('password');
   const autoLoginToggle = document.getElementById('autoLogin');
+  const decentUIToggle = document.getElementById('decentUI');
   const saveBtn = document.getElementById('saveBtn');
   const statusDiv = document.getElementById('status');
   
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const togglePasswordBtn = document.getElementById('togglePassword');
 
   // Load existing credentials
-  getStorage(["username", "password", "autoLogin"]).then((result) => {
+  getStorage(["username", "password", "autoLogin", "decentUI"]).then((result) => {
     if (result.username) usernameInput.value = result.username;
     if (result.password) passwordInput.value = result.password;
     
@@ -57,6 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
       autoLoginToggle.checked = result.autoLogin;
     } else {
       autoLoginToggle.checked = true;
+    }
+    if (result.decentUI !== undefined) {
+      decentUIToggle.checked = result.decentUI;
+    } else {
+      decentUIToggle.checked = true;
     }
   }).catch(error => {
     console.error("Error loading settings:", error);
@@ -67,11 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
     const autoLogin = autoLoginToggle.checked;
+    const decentUI = decentUIToggle.checked;
 
     statusDiv.className = '';
     statusDiv.textContent = 'Saving...';
     
-    setStorage({ username, password, autoLogin }).then(() => {
+    setStorage({ username, password, autoLogin, decentUI }).then(() => {
       statusDiv.textContent = 'Settings saved securely!';
       statusDiv.className = 'success';
       setTimeout(() => { statusDiv.textContent = ''; }, 3000);
@@ -118,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auto-save when toggle is clicked
   autoLoginToggle.addEventListener('change', () => {
+    saveBtn.click();
+  });
+  decentUIToggle.addEventListener('change', () => {
     saveBtn.click();
   });
 });
