@@ -49,7 +49,7 @@ const currentUrl = new URL(window.location.href);
 const loginUrlPath = 'login/index.php';
 const rootUrl = 'https://elearn.daffodilvarsity.edu.bd/';
 const dashboardUrl = 'https://elearn.daffodilvarsity.edu.bd/my/';
-const targetLogoSelector = 'img.navbar-brand-logo.logo';
+const targetLogoSelector = 'img.navbar-brand-logo, .navbar-brand img, img.logo';
 const extensionLogoUrl = extensionApi.runtime.getURL('icons/128x128.png');
 
 function replaceNavbarLogo() {
@@ -58,6 +58,15 @@ function replaceNavbarLogo() {
     if (logo.dataset.blcPlusLogoApplied === 'true') return;
     logo.src = extensionLogoUrl;
     logo.srcset = extensionLogoUrl;
+    
+    // Also update any <source> siblings if the img is inside a <picture>
+    if (logo.parentElement && logo.parentElement.tagName === 'PICTURE') {
+      const sources = logo.parentElement.querySelectorAll('source');
+      sources.forEach(source => {
+        source.srcset = extensionLogoUrl;
+      });
+    }
+
     logo.dataset.blcPlusLogoApplied = 'true';
   });
 }
@@ -84,8 +93,14 @@ setTimeout(() => {
   const isPlainRootPage = currentUrl.origin === 'https://elearn.daffodilvarsity.edu.bd' && currentUrl.pathname === '/' && currentUrl.search === '';
 
   if (!isLoggedOut && isPlainRootPage) {
+    sessionStorage.removeItem("blcPlus_login_attempted");
     console.log("blcPlus: Logged in and on root URL. Redirecting to dashboard...");
     window.location.replace(dashboardUrl);
+  }
+
+  // Also clear the flag if we reach the dashboard successfully
+  if (currentUrl.href.includes(dashboardUrl)) {
+    sessionStorage.removeItem("blcPlus_login_attempted");
   }
 }, 500);
 
@@ -97,7 +112,9 @@ getStorage(["username", "password", "autoLogin"]).then(async (result) => {
   }
 
   const isExplicitLoginPage = currentUrl.pathname.includes(loginUrlPath);
-  const isLoggedOutClassPresent = document.body.classList.contains('notloggedin');
+  const loginInfo = document.querySelector('.logininfo');
+  const isGuest = loginInfo && (loginInfo.textContent.includes('guest access') || loginInfo.textContent.includes('not logged in'));
+  const isLoggedOutClassPresent = document.body.classList.contains('notloggedin') || isGuest;
 
   // 2 & 3. Execute Auto-Login sequence
   // Trigger if we are on the explicit login URL OR if the body has the 'notloggedin' class (redundant method)
@@ -109,39 +126,41 @@ getStorage(["username", "password", "autoLogin"]).then(async (result) => {
     const passwordInput = await waitForElement("#password", 2500);
 
     if (usernameInput && passwordInput && result.username && result.password) {
+      
+      // Infinite loop prevention: check if we already tried to log in on this session
+      if (sessionStorage.getItem("blcPlus_login_attempted") === "true") {
+          console.warn("blcPlus: Auto-login halted. We already tried logging in recently (possible incorrect credentials).");
+          return;
+      }
+      
+      sessionStorage.setItem("blcPlus_login_attempted", "true");
+
       console.log("blcPlus: Fields found. Injecting credentials...");
       
-      // Inject and trigger events
-      usernameInput.value = result.username;
+      // Inject and trigger events, using native setter to bypass React/Vue input hijacking
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      
+      usernameInput.focus();
+      nativeInputValueSetter.call(usernameInput, result.username);
       usernameInput.dispatchEvent(new Event('input', { bubbles: true }));
       usernameInput.dispatchEvent(new Event('change', { bubbles: true }));
+      usernameInput.blur();
       
-      passwordInput.value = result.password;
+      passwordInput.focus();
+      nativeInputValueSetter.call(passwordInput, result.password);
       passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
       passwordInput.dispatchEvent(new Event('change', { bubbles: true }));
+      passwordInput.blur();
 
-      // Wait 500ms to mimic human timing / let JS validate, then submit
-      setTimeout(() => {
-        // Try exact ID first
-        let loginBtn = document.getElementById("loginbtn");
-        
-        // Fallback: Any submit button inside the same form
-        if (!loginBtn) {
-          const form = usernameInput.closest('form');
-          if (form) {
-            loginBtn = form.querySelector('button[type="submit"], input[type="submit"]');
-          }
-        }
-
-        if (loginBtn) {
-          console.log("blcPlus: Clicking login button...");
+      console.log("blcPlus: Credentials injected. Submitting form...");
+      
+      const loginBtn = document.getElementById("loginbtn");
+      if (loginBtn) {
           loginBtn.click();
-        } else {
-          console.log("blcPlus: Login button not found. Attempting to submit form directly...");
+      } else {
           const form = usernameInput.closest('form');
           if (form) form.submit();
-        }
-      }, 500);
+      } 
       
     } else {
       console.log("blcPlus: Missing username/password fields on this page.");

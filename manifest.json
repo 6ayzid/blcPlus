@@ -1,7 +1,7 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "blcPlus",
-  "version": "1.0",
+  "version": "1.0.3",
   "icons": {
     "48": "icons/48x48.png",
     "128": "icons/128x128.png"
@@ -9,14 +9,12 @@
   "description": "Fixes session timeouts and injects custom CSS on the university portal.",
   "permissions": [
     "storage",
-    "scripting",
-    "alarms"
-  ],
-  "host_permissions": [
+    "alarms",
     "https://elearn.daffodilvarsity.edu.bd/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"],
+    "persistent": false
   },
   "content_scripts": [
     {
@@ -30,7 +28,7 @@
       "run_at": "document_start"
     }
   ],
-  "action": {
+  "browser_action": {
     "default_popup": "popup.html",
     "default_title": "blcPlus Settings",
     "default_icon": {
@@ -39,10 +37,11 @@
     }
   },
   "web_accessible_resources": [
-    {
-      "resources": ["icons/128x128.png"],
-      "matches": ["https://elearn.daffodilvarsity.edu.bd/*"]
-    }
+    "icons/128x128.png"
   ],
-  "minimum_chrome_version": "88"
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "blcplus@bayzid.dev"
+    }
+  }
 }

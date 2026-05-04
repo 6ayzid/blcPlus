@@ -115,4 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
   });
+
+  // Auto-save when toggle is clicked
+  autoLoginToggle.addEventListener('change', () => {
+    saveBtn.click();
+  });
 });
