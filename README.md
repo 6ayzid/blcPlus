@@ -5,7 +5,6 @@
   
   **BLC, but actually good**
   
-  [![Firefox Add-on](https://img.shields.io/badge/Firefox-Extension-FF7139?style=flat-square&logo=Firefox-Browser)](https://github.com/6ayzid/blcPlus)
   [![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=flat-square)](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
   [![Open Source](https://img.shields.io/badge/Open_Source-❤️-success?style=flat-square)](https://github.com/6ayzid/blcPlus)
   
