@@ -1,6 +1,84 @@
 // content.js - Auto-login and redirect script for blcPlus
 const extensionApi = globalThis.browser ?? globalThis.chrome;
 
+function syncMobileShellClass() {
+  const isTouchShell =
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches ||
+    window.matchMedia('(max-width: 900px)').matches;
+
+  document.documentElement.classList.toggle('blc-mobile-shell', isTouchShell);
+}
+
+syncMobileShellClass();
+window.addEventListener('resize', syncMobileShellClass, { passive: true });
+
+function ensureBlcSkeletonLoader() {
+  if (document.getElementById('blcSkeletonLoader')) return;
+
+  const loader = document.createElement('div');
+  loader.id = 'blcSkeletonLoader';
+  loader.setAttribute('aria-hidden', 'true');
+  loader.innerHTML = `
+    <div class="blc-skeleton-shell">
+      <div class="blc-skeleton-topbar"></div>
+      <div class="blc-skeleton-grid">
+        <div class="blc-skeleton-main">
+          <div class="blc-skeleton-line blc-skeleton-title"></div>
+          <div class="blc-skeleton-line blc-skeleton-short"></div>
+          <div class="blc-skeleton-card blc-skeleton-hero"></div>
+          <div class="blc-skeleton-row">
+            <div class="blc-skeleton-card"></div>
+            <div class="blc-skeleton-card"></div>
+          </div>
+          <div class="blc-skeleton-card blc-skeleton-wide"></div>
+        </div>
+        <div class="blc-skeleton-side">
+          <div class="blc-skeleton-card"></div>
+          <div class="blc-skeleton-card"></div>
+          <div class="blc-skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.documentElement.appendChild(loader);
+}
+
+function replaceRemuiLoaderImages(root = document) {
+  const selector = 'img[src*="/theme/remui/pix/siteloader.svg"], img[src*="/theme/remui/pix/siteinnerloader.svg"], img[src*="siteinnerloader"]';
+  const images = [];
+
+  if (root.nodeType === Node.ELEMENT_NODE && root.matches(selector)) {
+    images.push(root);
+  }
+
+  root.querySelectorAll?.(selector).forEach((img) => images.push(img));
+
+  images.forEach((img) => {
+    if (img.dataset.blcSkeletonApplied === 'true') return;
+
+    const skeleton = document.createElement('span');
+    skeleton.className = 'blc-inline-skeleton';
+    skeleton.setAttribute('aria-hidden', 'true');
+    img.dataset.blcSkeletonApplied = 'true';
+    img.replaceWith(skeleton);
+  });
+}
+
+function startSkeletonLoaderWatcher() {
+  replaceRemuiLoaderImages();
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        replaceRemuiLoaderImages(node);
+      });
+    });
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+}
+
 function getStorage(keys) {
   if (globalThis.browser?.storage?.local?.get) {
     return globalThis.browser.storage.local.get(keys);
@@ -19,17 +97,130 @@ function getStorage(keys) {
   });
 }
 
+const currentUrl = new URL(window.location.href);
+const loginUrlPath = 'login/index.php';
+const rootUrl = 'https://elearn.daffodilvarsity.edu.bd/';
+const dashboardUrl = 'https://elearn.daffodilvarsity.edu.bd/my/';
+const targetLogoSelector = 'img.navbar-brand-logo, .navbar-brand img, img.logo';
+const extensionLogoUrl = extensionApi.runtime.getURL('icons/128x128.png');
+const isCourseEnrolPage =
+  currentUrl.origin === 'https://elearn.daffodilvarsity.edu.bd' &&
+  currentUrl.pathname === '/enrol/index.php' &&
+  currentUrl.searchParams.has('id');
+const isRetiredRootRedirectPage =
+  currentUrl.origin === 'https://elearn.daffodilvarsity.edu.bd' &&
+  currentUrl.pathname === '/' &&
+  currentUrl.searchParams.get('redirect') === '0';
+
+function getLoginUrlWithReturn(returnUrl = window.location.href) {
+  const loginUrl = new URL(`https://elearn.daffodilvarsity.edu.bd/${loginUrlPath}`);
+  loginUrl.searchParams.set('wantsurl', returnUrl);
+  return loginUrl.href;
+}
+
+function getSafeBLCUrl(value) {
+  try {
+    const url = new URL(value, rootUrl);
+    return url.origin === 'https://elearn.daffodilvarsity.edu.bd' ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function isAlreadyLoggedInLoginPrompt() {
+  if (!currentUrl.pathname.includes(loginUrlPath) || !document.body) return false;
+
+  const pageText = (document.body.textContent || "").toLowerCase();
+  return pageText.includes("you are already logged in as") &&
+    pageText.includes("you need to log out before logging in as different user");
+}
+
+function redirectAwayFromAlreadyLoggedInPrompt() {
+  if (!isAlreadyLoggedInLoginPrompt()) return false;
+
+  const wantsUrl = currentUrl.searchParams.get('wantsurl');
+  const pendingEnrolUrl = sessionStorage.getItem("blcPlus_pending_enrol_url");
+  const returnUrl = getSafeBLCUrl(wantsUrl) || getSafeBLCUrl(pendingEnrolUrl) || dashboardUrl;
+
+  sessionStorage.removeItem("blcPlus_login_attempted");
+  sessionStorage.removeItem("blcPlus_pending_enrol_url");
+  console.log("blcPlus: Already-logged-in login prompt detected. Redirecting to intended page...");
+  window.location.replace(returnUrl);
+  return true;
+}
+
+function redirectLoggedOutEnrolPageToLogin() {
+  if (!isCourseEnrolPage || !document.body) return false;
+
+  const loginInfo = document.querySelector('.logininfo');
+  const isGuest = loginInfo &&
+    (loginInfo.textContent.includes('guest access') || loginInfo.textContent.includes('not logged in'));
+  const isLoggedOut = document.body.classList.contains('notloggedin') || isGuest;
+  const hasEnrolPassword = Boolean(document.querySelector('input[name="enrolpassword"]'));
+
+  if (!isLoggedOut || hasEnrolPassword) return false;
+
+  sessionStorage.setItem("blcPlus_pending_enrol_url", window.location.href);
+  sessionStorage.removeItem("blcPlus_login_attempted");
+  console.log("blcPlus: Logged-out enrol page detected. Redirecting to login with course return URL...");
+  window.location.replace(getLoginUrlWithReturn(window.location.href));
+  return true;
+}
+
+function enhanceSelfEnrolForm() {
+  if (!isCourseEnrolPage || !document.body) return;
+
+  const form = document.querySelector('form[action*="/enrol/index.php"]');
+  const enrolPassword = form?.querySelector('input[name="enrolpassword"]');
+  const submitButton = form?.querySelector('#id_submitbutton, input[name="submitbutton"][type="submit"]');
+  const passwordItem = enrolPassword?.closest('.fitem');
+  const submitItem = submitButton?.closest('.fitem');
+  const passwordElement = enrolPassword?.closest('.felement');
+
+  if (!form || !enrolPassword || !submitButton || !passwordItem || !submitItem || !passwordElement) return;
+  if (form.dataset.blcPlusEnrolEnhanced === 'true') return;
+
+  const actionRow = document.createElement('div');
+  actionRow.className = 'blc-enrol-action-row blc-decent-wrapper';
+
+  const inputWrap = document.createElement('div');
+  inputWrap.className = 'blc-enrol-key-wrap';
+
+  enrolPassword.parentNode.insertBefore(inputWrap, enrolPassword);
+  inputWrap.appendChild(enrolPassword);
+  actionRow.appendChild(inputWrap);
+  actionRow.appendChild(submitButton);
+  passwordElement.appendChild(actionRow);
+
+  submitItem.classList.add('blc-enrol-submit-relocated');
+  passwordItem.classList.add('blc-enrol-key-enhanced');
+  form.classList.add('blc-enrol-form-enhanced');
+  form.dataset.blcPlusEnrolEnhanced = 'true';
+}
+
+if (isRetiredRootRedirectPage) {
+  document.documentElement.setAttribute('data-blc-loading', 'true');
+  sessionStorage.removeItem("blcPlus_login_attempted");
+  console.log("blcPlus: Retired root redirect page detected. Redirecting to login flow...");
+  window.location.replace(`https://elearn.daffodilvarsity.edu.bd/${loginUrlPath}`);
+}
+
 // Initialize decent design wrapper immediately avoiding async delay if possible
 let isDecentUIEnabled = true;
-getStorage(["decentUI"]).then(result => {
-  if (result.decentUI === false) {
-    document.documentElement.setAttribute('data-theme-decent', 'false');
-    isDecentUIEnabled = false;
-  }
-});
+if (!isRetiredRootRedirectPage) {
+  getStorage(["decentUI"]).then(result => {
+    if (result.decentUI === false) {
+      document.documentElement.setAttribute('data-theme-decent', 'false');
+      isDecentUIEnabled = false;
+    }
+  });
+}
 
 // Immediately hide the raw Moodle DOM for Decent UI injection
-document.documentElement.setAttribute('data-blc-loading', 'true');
+if (!isRetiredRootRedirectPage) {
+  ensureBlcSkeletonLoader();
+  document.documentElement.setAttribute('data-blc-loading', 'true');
+}
 
 console.log("blcPlus: Content script initialized.");
 
@@ -55,13 +246,6 @@ function waitForElement(selector, timeout = 5000) {
     }, timeout);
   });
 }
-
-const currentUrl = new URL(window.location.href);
-const loginUrlPath = 'login/index.php';
-const rootUrl = 'https://elearn.daffodilvarsity.edu.bd/';
-const dashboardUrl = 'https://elearn.daffodilvarsity.edu.bd/my/';
-const targetLogoSelector = 'img.navbar-brand-logo, .navbar-brand img, img.logo';
-const extensionLogoUrl = extensionApi.runtime.getURL('icons/128x128.png');
 
 function replaceNavbarLogo() {
   const logos = document.querySelectorAll(targetLogoSelector);
@@ -92,20 +276,35 @@ function startNavbarLogoWatcher() {
   logoObserver.observe(document.documentElement, { childList: true, subtree: true });
 }
 
-if (document.readyState === 'loading') {
+if (isRetiredRootRedirectPage) {
+  console.log("blcPlus: Skipping Decent UI injection on retired redirect page.");
+} else if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
+    if (redirectAwayFromAlreadyLoggedInPrompt()) return;
+    if (redirectLoggedOutEnrolPageToLogin()) return;
+
+    startSkeletonLoaderWatcher();
     startNavbarLogoWatcher();
     buildDecentNavbar();
+    enhanceSelfEnrolForm();
     document.documentElement.removeAttribute('data-blc-loading');
   }, { once: true });
 } else {
-  startNavbarLogoWatcher();
-  buildDecentNavbar();
-  document.documentElement.removeAttribute('data-blc-loading');
+  if (!redirectAwayFromAlreadyLoggedInPrompt() && !redirectLoggedOutEnrolPageToLogin()) {
+    startSkeletonLoaderWatcher();
+    startNavbarLogoWatcher();
+    buildDecentNavbar();
+    enhanceSelfEnrolForm();
+    document.documentElement.removeAttribute('data-blc-loading');
+  }
 }
 
 // 1. Root URL Redirect (If logged in, go to Dashboard)
 setTimeout(() => {
+  if (isRetiredRootRedirectPage) return;
+  if (redirectAwayFromAlreadyLoggedInPrompt()) return;
+  if (redirectLoggedOutEnrolPageToLogin()) return;
+
   const isLoggedOut = document.body.classList.contains('notloggedin');
   const isPlainRootPage = currentUrl.origin === 'https://elearn.daffodilvarsity.edu.bd' && currentUrl.pathname === '/' && currentUrl.search === '';
 
@@ -122,11 +321,14 @@ setTimeout(() => {
 }, 500);
 
 // Retrieve stored settings
-getStorage(["username", "password", "autoLogin"]).then(async (result) => {
+if (!isRetiredRootRedirectPage) {
+  getStorage(["username", "password", "autoLogin"]).then(async (result) => {
   if (result.autoLogin !== true) {
     console.log("blcPlus: Auto-Login is disabled or settings not found.");
     return;
   }
+
+  if (redirectAwayFromAlreadyLoggedInPrompt()) return;
 
   const isExplicitLoginPage = currentUrl.pathname.includes(loginUrlPath);
   const loginInfo = document.querySelector('.logininfo');
@@ -185,7 +387,7 @@ getStorage(["username", "password", "autoLogin"]).then(async (result) => {
       // If we couldn't find the fields, but we are logged out and NOT on the login page -> Redirect
       if (isLoggedOutClassPresent && !isExplicitLoginPage) {
         console.log("blcPlus: Redirecting to dedicated login page...");
-        window.location.replace(`https://elearn.daffodilvarsity.edu.bd/${loginUrlPath}`);
+        window.location.replace(isCourseEnrolPage ? getLoginUrlWithReturn(window.location.href) : `https://elearn.daffodilvarsity.edu.bd/${loginUrlPath}`);
       }
     }
   }
@@ -193,20 +395,21 @@ getStorage(["username", "password", "autoLogin"]).then(async (result) => {
 }).catch((error) => {
   console.error("blcPlus: Error accessing local storage:", error);
 });
+}
 
 function buildDecentNavbar() {
   if (!isDecentUIEnabled) return;
   if (document.querySelector('.blc-decent-navbar')) return;
 
-  const moodleLogoEl = document.querySelector('.navbar-brand-logo');
-  const customLogoSrc = chrome.runtime.getURL('logo/128x128.png');
+  const customLogoSrc = extensionApi.runtime.getURL('logo/128x128.png');
 
   const navHTML = `
   <nav class="navbar blc-decent-navbar blc-decent-wrapper" id="decentNavbar" aria-label="Main navigation">
     <div class="decent-navbar-inner">
       <div class="nav-left">
         <button class="logo" style="background:transparent;border:none;cursor:pointer;padding:0;outline:none;" onclick="window.location.href='https://elearn.daffodilvarsity.edu.bd/my/'">
-          <img src="${customLogoSrc}" style="height: 32px; width: auto;" alt="blcPlus Logo">
+          <span class="logo-mark"><img src="${customLogoSrc}" alt="" aria-hidden="true"></span>
+          <span class="logo-text">blcPlus</span>
         </button>
         <div class="nav-links" id="desktopNav">
           <button class="nav-link ${currentUrl.pathname.includes('/my/index.php') || currentUrl.pathname.endsWith('/my/') ? 'active' : ''}" data-view="dashboard" aria-current="page" onclick="window.location.href='https://elearn.daffodilvarsity.edu.bd/my/'">
